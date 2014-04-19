@@ -1,0 +1,81 @@
+#include <SPI.h>
+
+int SelectSlave = 53;
+
+byte buffer[8];
+
+
+void setup(){
+
+
+  // init SPI library  
+  pinMode (SS, OUTPUT);   
+  SPI.setBitOrder(MSBFIRST);
+  SPI.begin(); 
+
+  DDRC = 0xFF;   // make all pins output
+
+
+}
+
+
+void loop(){
+
+  // write data to one byte at a time (8 pins in the same row)
+  digitalWrite(SelectSlave,LOW);
+
+  buffer[0] = 0;
+  SPI.transfer(buffer[0]);
+  buffer[1] = 0xFF;
+  SPI.transfer(buffer[1]);   
+  buffer[2] = 0;
+  SPI.transfer(buffer[2]);
+  buffer[3] = 0;
+  SPI.transfer(buffer[3]);
+  buffer[4] = 0;
+  SPI.transfer(buffer[4]);
+  buffer[5] = 0;
+  SPI.transfer(buffer[5]);
+  buffer[6] = 0;
+  SPI.transfer(buffer[6]);    
+  buffer[7] = 0;
+  SPI.transfer(buffer[7]);
+
+  digitalWrite(SelectSlave, HIGH);
+
+
+  // cycle through layers 
+
+  for (int j = 0; j < 8; j++){  
+    PORTC = 0;
+    PORTC = 1 << j;
+    delay(1000);
+  } 
+
+
+
+
+}
+
+
+
+int SPI_Write() {
+
+  // now send 8 times 8 bytes - 8 bytes for each layer
+  for (int j = 0; j < 8; j++){     // layers
+    // take the SS pin low to select the chip:
+    digitalWrite(SelectSlave,LOW);
+    for (int i = 0; i < 8; i++){  // columns - each bit is an LED
+
+      //  send in the address and value via SPI:
+      SPI.transfer(buffer[i]);
+    }
+    // take the SS pin high to de-select the chip:
+    digitalWrite(SelectSlave,HIGH); 
+    delay(300);
+  }
+  delay(300);
+}
+
+
+
